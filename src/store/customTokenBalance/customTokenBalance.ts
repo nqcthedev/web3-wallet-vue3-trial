@@ -117,6 +117,13 @@ export const useCustomTokenBalanceStore = defineStore('customTokenBalance', () =
   }
 
   /**
+   * Clear error only
+   */
+  function clearError() {
+    errorKey.value = null
+  }
+
+  /**
    * Reset store state
    */
   function reset() {
@@ -138,6 +145,7 @@ export const useCustomTokenBalanceStore = defineStore('customTokenBalance', () =
     // Actions
     setContractAddress,
     checkBalance,
+    clearError,
     reset
   }
 })

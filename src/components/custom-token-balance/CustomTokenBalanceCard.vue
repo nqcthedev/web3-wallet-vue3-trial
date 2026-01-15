@@ -188,9 +188,9 @@ async function handleCheckBalance() {
     return
   }
 
-  // Clear previous error
+  // Clear previous error before checking
   if (customTokenBalanceStore.errorKey) {
-    customTokenBalanceStore.reset()
+    customTokenBalanceStore.clearError()
   }
 
   // Update store with input value
@@ -216,12 +216,12 @@ function handleClear() {
 watch(
   [() => walletStore.account, () => walletStore.chainIdDec, () => walletStore.isConnected],
   ([newAccount, newChainId, isConnected], [oldAccount, oldChainId, wasConnected]) => {
-    // Clear state if account/chain changed or wallet disconnected
-    const accountChanged = oldAccount !== undefined && newAccount !== oldAccount
-    const chainChanged = oldChainId !== undefined && newChainId !== oldChainId
-    const disconnected = wasConnected !== undefined && wasConnected && !isConnected
-
-    if (accountChanged || chainChanged || disconnected) {
+    // Clear state if account/chain changed or wallet disconnected (skip initial mount)
+    if (
+      (oldAccount !== undefined && newAccount !== oldAccount) ||
+      (oldChainId !== undefined && newChainId !== oldChainId) ||
+      (wasConnected !== undefined && wasConnected && !isConnected)
+    ) {
       customTokenBalanceStore.reset()
       inputValue.value = ''
     }
