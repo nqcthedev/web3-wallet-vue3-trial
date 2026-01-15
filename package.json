@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "vue": "^3.4.21",
-    "pinia": "^2.1.7"
+    "pinia": "^2.1.7",
+    "web3": "^4.11.0",
+    "vue-sonner": "^1.0.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

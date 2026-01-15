@@ -1,12 +1,19 @@
 <template>
   <div class="min-h-screen bg-white dark:bg-gray-900 transition-colors">
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="container mx-auto px-4 py-4">
+    <header class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
-          <h1 class="text-xl font-semibold">Web3 Wallet</h1>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Web3 Wallet</h1>
+          </div>
           <button
-            @click="toggleDarkMode"
-            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            @click="toggle"
+            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             aria-label="Toggle dark mode"
           >
             <svg
@@ -41,34 +48,14 @@
         </div>
       </div>
     </header>
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-6xl">
       <slot />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { useTheme } from '@/theme/useTheme'
 
-const isDark = ref(false)
-
-const toggleDarkMode = () => {
-  isDark.value = !isDark.value
-  if (isDark.value) {
-    document.documentElement.classList.add('dark')
-    localStorage.setItem('theme', 'dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-    localStorage.setItem('theme', 'light')
-  }
-}
-
-onMounted(() => {
-  // Check for saved theme preference or default to light mode
-  const savedTheme = localStorage.getItem('theme')
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
-})
+const { isDark, toggle } = useTheme()
 </script>
