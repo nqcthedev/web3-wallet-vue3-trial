@@ -23,53 +23,80 @@ The app focuses on:
 ---
 
 ## Project Structure (src/)
-
-- `app/`
-  - `App.vue` – root component, wires main layout and feature cards
-  - `main-layout.vue` – shell layout, theme integration
-- `components/`
-  - `wallet/WalletConnect.vue` – connect/disconnect UI, status, chain info
-  - `token-balance-card/TokenBalancesCard.vue` – USDC/USDT balances
-  - `token-balance-card/TokenBalanceCard.vue` – single token card
-  - `custom-token-balance/CustomTokenBalanceCard.vue` – custom ERC-20 balance
-  - `ui/` – shared UI components:
-    - `StatusBadge.vue` – status indicator badge (connected/disconnected/error)
-    - `InlineAlert.vue` – alert component (info/warning/error)
-    - `Skeleton.vue` – loading skeleton placeholder
-    - `SectionHeader.vue` – section title with optional description
-    - `CopyButton.vue` – copy-to-clipboard button
-- `config/`
-  - `chains.ts` – supported chains and chain names
-  - `tokens.ts` – token map (USDC/USDT per chain)
-  - `rpc.ts` – RPC URLs for chains
-- `features/`
-  - `tokens/core/erc20.ts` – ERC-20 read helpers (balance, decimals, symbol)
-- `messages/`
-  - `errors.ts` – centralized error messages (`ERROR_MESSAGES`, `ErrorKey`)
-  - `success.ts` – centralized success/info messages
-- `wallet/`
-  - `core/types.ts` – wallet interfaces (`IWallet`, `IEVMWallet`, event types)
-  - `adapters/` – wallet adapter implementations:
-    - `metamask.ts` – MetaMask adapter (EIP-1193)
-    - `index.ts` – adapter registry and factory
-- `shared/`
-  - `composables/useCopyAddress.ts` – copy-to-clipboard with toasts
-  - `types/` – shared TS types (`WalletId`, window typings, etc.)
-  - `utils/`
-    - `index.ts` – shared helpers exports (shortAddress, epoch, web3 helpers, etc.)
-    - `clipboard.ts` – low-level clipboard helper
-    - `epoch.ts` – epoch/stale-request utilities
-    - `wallet.ts` – `isUserRejection` helper
-    - `web3.ts` – `createWeb3Instance` with per-chain RPC
-    - `web3ErrorMapper.ts` – maps raw Web3/provider errors → `ErrorKey`
-- `store/`
-  - `wallet/wallet.ts` – single source of truth for wallet state (MetaMask)
-  - `tokenBalances/tokenBalances.ts` – USDC/USDT balances, epoch guard
-  - `customTokenBalance/customTokenBalance.ts` – custom ERC-20 balance, epoch guard
-- `theme/`
-  - `useTheme.ts` – dark/light theme with `class="dark"` on `documentElement`
-- `styles/main.css` – Tailwind entry + base styles
-
+src/
+├─ app/
+│  ├─ App.vue                 # Root component, wires layout + feature cards
+│  └─ main-layout.vue         # App shell, header, theme toggle
+│
+├─ components/
+│  ├─ wallet/
+│  │  └─ WalletConnect.vue    # Wallet connect/disconnect UI + status
+│  ├─ token-balance-card/
+│  │  ├─ TokenBalancesCard.vue # USDC/USDT balances section
+│  │  └─ TokenBalanceCard.vue  # Single token balance card
+│  ├─ custom-token-balance/
+│  │  └─ CustomTokenBalanceCard.vue # Custom ERC-20 balance UI
+│  └─ ui/
+│     ├─ StatusBadge.vue
+│     ├─ InlineAlert.vue
+│     ├─ Skeleton.vue
+│     ├─ SectionHeader.vue
+│     └─ CopyButton.vue
+│
+├─ config/
+│  ├─ chains.ts               # Supported chains configuration
+│  ├─ tokens.ts               # Token metadata (USDC, USDT) per chain
+│  └─ rpc.ts                  # RPC URLs per chain
+│
+├─ features/
+│  └─ tokens/
+│     └─ core/
+│        └─ erc20.ts          # ERC-20 read helpers (balanceOf, decimals, symbol)
+│
+├─ messages/
+│  ├─ errors.ts               # ERROR_MESSAGES, ErrorKey
+│  └─ success.ts              # SUCCESS_MESSAGES
+│
+├─ shared/
+│  ├─ composables/
+│  │  └─ useCopyAddress.ts
+│  ├─ types/
+│  │  ├─ index.ts
+│  │  └─ window.d.ts
+│  └─ utils/
+│     ├─ index.ts
+│     ├─ clipboard.ts
+│     ├─ epoch.ts
+│     ├─ wallet.ts
+│     ├─ web3.ts
+│     └─ web3ErrorMapper.ts
+│
+├─ store/
+│  ├─ wallet/
+│  │  ├─ wallet.ts
+│  │  └─ index.ts
+│  ├─ tokenBalances/
+│  │  ├─ tokenBalances.ts
+│  │  └─ index.ts
+│  └─ customTokenBalance/
+│     ├─ customTokenBalance.ts
+│     └─ index.ts
+│
+├─ theme/
+│  └─ useTheme.ts
+│
+├─ wallet/
+│  ├─ adapters/
+│  │  ├─ index.ts
+│  │  └─ metamask.ts
+│  └─ core/
+│     └─ types.ts
+│
+├─ styles/
+│  └─ main.css
+│
+├─ main.ts
+└─ vite-env.d.ts
 ---
 
 ## Scripts
