@@ -5,25 +5,26 @@
 import Web3 from 'web3'
 
 /**
- * Format number string with locale formatting
- * Avoids precision loss from Number conversion for large numbers
+ * Format number string with locale formatting (thousand separators)
+ * Uses string manipulation to avoid precision loss for large numbers
  */
-function formatNumberString(value: string, maxDecimals: number): string {
+function formatNumberString(value: string): string {
   // Split into whole and fractional parts
   const [wholePart, fractionalPart = ''] = value.split('.')
   
-  // Format whole part with locale
-  const formattedWhole = Number(wholePart).toLocaleString('en-US')
-  
-  // Handle fractional part
-  if (!fractionalPart || maxDecimals === 0) {
-    return formattedWhole
+  // Format whole part with thousand separators using string manipulation
+  // This avoids precision loss from Number conversion for very large numbers
+  let formattedWhole = ''
+  for (let i = wholePart.length - 1, count = 0; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) {
+      formattedWhole = ',' + formattedWhole
+    }
+    formattedWhole = wholePart[i] + formattedWhole
+    count++
   }
   
-  // Trim fractional part to maxDecimals and remove trailing zeros
-  const trimmedFractional = fractionalPart.slice(0, maxDecimals).replace(/0+$/, '')
-  
-  return trimmedFractional ? `${formattedWhole}.${trimmedFractional}` : formattedWhole
+  // Return with fractional part if it exists (already trimmed in getErc20Balance)
+  return fractionalPart ? `${formattedWhole}.${fractionalPart}` : formattedWhole
 }
 
 // Minimal ERC-20 ABI for read operations (web3.js v4 compatible)
@@ -114,10 +115,8 @@ export async function getErc20Balance(
       }
     }
     
-    // Format with proper decimal places for display
-    // Avoid Number conversion for very large numbers to prevent precision loss
-    // Use string manipulation for better precision
-    const displayValue = formatNumberString(formattedValue, decimals)
+    // Add thousand separators for display (formattedValue already has correct decimals and trailing zeros removed)
+    const displayValue = formatNumberString(formattedValue)
 
     // Optional: Fetch symbol
     let symbol: string | undefined

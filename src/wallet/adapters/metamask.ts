@@ -5,6 +5,17 @@
 import type { IEVMWallet, WalletEvent, AccountsChangedPayload, ChainChangedPayload, DisconnectPayload } from '../core/types'
 
 /**
+ * Ethereum provider interface
+ */
+interface EthereumProvider {
+  isMetaMask?: boolean
+  providers?: EthereumProvider[]
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+  on: (event: string, handler: (...args: unknown[]) => void) => void
+  removeListener: (event: string, handler: (...args: unknown[]) => void) => void
+}
+
+/**
  * MetaMask wallet adapter implementation
  */
 export class MetaMaskAdapter implements IEVMWallet {
@@ -16,24 +27,51 @@ export class MetaMaskAdapter implements IEVMWallet {
   private wrapperMap: Map<string, Map<(event: WalletEvent) => void, (...args: unknown[]) => void>> = new Map()
 
   /**
+   * Get MetaMask provider
+   * Handles window.ethereum.providers array and direct injection
+   */
+  private getProvider(): EthereumProvider | null {
+    if (typeof window === 'undefined' || !window.ethereum) {
+      return null
+    }
+
+    // Check if providers array exists (multiple wallets installed)
+    if (Array.isArray((window.ethereum as any).providers)) {
+      // Find MetaMask in providers array
+      const metamaskProvider = (window.ethereum as any).providers.find(
+        (provider: EthereumProvider) => provider.isMetaMask === true
+      )
+      if (metamaskProvider) {
+        return metamaskProvider
+      }
+    }
+
+    // Check if MetaMask is directly injected
+    if ((window.ethereum as EthereumProvider).isMetaMask === true) {
+      return window.ethereum as EthereumProvider
+    }
+
+    return null
+  }
+
+  /**
    * Check if MetaMask is installed
    */
   isInstalled(): boolean {
-    return typeof window !== 'undefined' && 
-           typeof window.ethereum !== 'undefined' && 
-           window.ethereum.isMetaMask === true
+    return this.getProvider() !== null
   }
 
   /**
    * Connect to MetaMask
    */
   async connect(): Promise<string[]> {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       throw new Error('MetaMask is not installed')
     }
 
     try {
-      const accounts = await window.ethereum!.request({
+      const accounts = await provider.request({
         method: 'eth_requestAccounts'
       })
       return accounts as string[]
@@ -56,12 +94,13 @@ export class MetaMaskAdapter implements IEVMWallet {
    * Get current accounts
    */
   async getAccounts(): Promise<string[]> {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       return []
     }
 
     try {
-      const accounts = await window.ethereum!.request({
+      const accounts = await provider.request({
         method: 'eth_accounts'
       })
       return accounts as string[]
@@ -74,23 +113,25 @@ export class MetaMaskAdapter implements IEVMWallet {
    * Request method (EIP-1193)
    */
   async request(method: string, params?: unknown[]): Promise<unknown> {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       throw new Error('MetaMask is not installed')
     }
 
-    return window.ethereum!.request({ method, params })
+    return provider.request({ method, params })
   }
 
   /**
    * Get current chain ID
    */
   async getChainId(): Promise<string> {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       throw new Error('MetaMask is not installed')
     }
 
     try {
-      const chainId = await window.ethereum!.request({
+      const chainId = await provider.request({
         method: 'eth_chainId'
       })
       return chainId as string
@@ -104,7 +145,8 @@ export class MetaMaskAdapter implements IEVMWallet {
    * Subscribe to wallet events
    */
   on(event: 'accountsChanged' | 'chainChanged' | 'disconnect', handler: (event: WalletEvent) => void): void {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       return
     }
 
@@ -128,7 +170,7 @@ export class MetaMaskAdapter implements IEVMWallet {
       return
     }
     
-    window.ethereum!.on(event, wrapper)
+    provider.on(event, wrapper)
 
     // Store wrapper for cleanup
     if (!this.wrapperMap.has(event)) {
@@ -185,7 +227,8 @@ export class MetaMaskAdapter implements IEVMWallet {
    * Unsubscribe from wallet events
    */
   off(event: 'accountsChanged' | 'chainChanged' | 'disconnect', handler: (event: WalletEvent) => void): void {
-    if (!this.isInstalled()) {
+    const provider = this.getProvider()
+    if (!provider) {
       return
     }
 
@@ -194,8 +237,8 @@ export class MetaMaskAdapter implements IEVMWallet {
     
     // Remove wrapper and unsubscribe from MetaMask
     const wrapper = this.wrapperMap.get(event)?.get(handler)
-    if (wrapper && window.ethereum) {
-      window.ethereum.removeListener(event, wrapper)
+    if (wrapper && provider.removeListener) {
+      provider.removeListener(event, wrapper)
       this.wrapperMap.get(event)?.delete(handler)
     }
   }

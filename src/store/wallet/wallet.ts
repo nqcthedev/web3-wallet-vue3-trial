@@ -204,14 +204,11 @@ export const useWalletStore = defineStore('wallet', () => {
    * @param adapter - Wallet adapter instance
    */
   function attachListeners(adapter: IWallet) {
-    // Remove old listeners if adapter changed or if already attached to same adapter
-    if (currentAdapter) {
-      // Only remove if adapter changed or if handlers already exist (prevent duplicates)
-      if (currentAdapter !== adapter || (accountsHandler && chainHandler && disconnectHandler)) {
-        if (accountsHandler) currentAdapter.off('accountsChanged', accountsHandler)
-        if (chainHandler) currentAdapter.off('chainChanged', chainHandler)
-        if (disconnectHandler) currentAdapter.off('disconnect', disconnectHandler)
-      }
+    // Always remove old listeners first to prevent duplicates
+    if (currentAdapter && accountsHandler && chainHandler && disconnectHandler) {
+      currentAdapter.off('accountsChanged', accountsHandler)
+      currentAdapter.off('chainChanged', chainHandler)
+      currentAdapter.off('disconnect', disconnectHandler)
     }
 
     currentAdapter = adapter
